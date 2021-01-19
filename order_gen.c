@@ -67,7 +67,7 @@ void fill_queue (int matrix[SIZE_F][SIZE_C],int status[SIZE_F]){
         status[i]=0;
 }
 
-/**/
+/*Retorna la cantidad de las ordenes pendientes*/
 int pending_items(int matrix[SIZE_F][SIZE_C]){
 	int sum,i;
 	sum=0;
@@ -76,17 +76,18 @@ int pending_items(int matrix[SIZE_F][SIZE_C]){
 	return(sum);
 }
 
-/**/
+/*Retorna -1 si ocurre un error al sumar los panes
+Retorna un i random que representa la orden*/
 int next_item (int matrix[SIZE_F][SIZE_C]){
     int i, j;
     int sum;
     
-    for (i = 0; i < SIZE_F; i++) 
-	sum=sum+matrix[i][0];
+    for (i = 0; i < SIZE_F; i++)
+		sum=sum+matrix[i][0];
     if (sum<=0)
         return (-1);
     while(pending_items(matrix)>0){
-		i=(rand() % (SIZE_F - 1));
+		i=(rand() % (SIZE_F - 1)); //Va de 0 - 9 
 		return(i);	
     }
 }
@@ -103,6 +104,7 @@ int main (int argc, char *argv[])
    struct sockaddr_in address;
    int result;
 
+   // -- Inicio de la conexion -- 
     //Create socket for client.
    sockfd = socket(PF_INET, SOCK_STREAM, 0);
    if (sockfd == -1) { 
@@ -121,30 +123,37 @@ int main (int argc, char *argv[])
 		perror("Error has occurred");
 		exit(-1);
   }
+  // -- Fin de la conexion --
 
-    fill_queue(matrix,status);
-    print_queue (matrix);
+  	// -- Inicio creacion de las 10 Ordenes --
+    fill_queue(matrix,status); //Llenamos las ordenes
+    print_queue (matrix); //Mostramos los datos
     printf("%d",pending_items(matrix));
+    //Muestra los datos cada 0.5 seg mientras haya ordenes pendientes
     while(pending_items(matrix)>0){
-	nanosleep(&tim , &tim2); 
-	i=next_item(matrix);
-        if (status[i]==2) {
-	   while(status[i++]!=2); 	
+		nanosleep(&tim , &tim2); 
+		i=next_item(matrix);
 
-        }
-        memset(buffer,0,sizeof(buffer));
-	if (status[i]==0) {
-		status[i]=1;
-		sprintf(buffer,"Orden %d Ingredientes %d-%d-%d-%d",i,matrix[i][0],matrix[i][1],matrix[i][2],matrix[i][3]);
-		rc = write(sockfd, &buffer, strlen(buffer));
-		continue;		
-	}
-	if (status[i]==1) {
-    for (int j = 0; j < SIZE_C; j++){
-      matrix[i][j]=0;
-			status[i]=2;
+		// -- Iniciamos evaluacion de los estados 0 no enviado, 1 en proceso, 2 finalizado
+
+	    if (status[i]==2) {
+	   		while(status[i++]!=2);
+	    }
+	    memset(buffer,0,sizeof(buffer));
+		if (status[i]==0) {
+			status[i]=1;
+			sprintf(buffer,"Orden %d Ingredientes %d-%d-%d-%d",i,matrix[i][0],matrix[i][1],matrix[i][2],matrix[i][3]);
+			rc = write(sockfd, &buffer, strlen(buffer));
+			continue;		
 		}
-    }    
-  }
+		if (status[i]==1) {
+		    for (int j = 0; j < SIZE_C; j++){
+		    	matrix[i][j]=0;
+				status[i]=2;
+			}
+    	}
+    	// -- Fin de la evaluacion --    
+  	}
+
     return 0;
 }

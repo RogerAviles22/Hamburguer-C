@@ -9,8 +9,8 @@
 
  
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]){
+	
 	//Declaring process variables.
 	int server_sockfd, client_sockfd;
 	int server_len ; 
