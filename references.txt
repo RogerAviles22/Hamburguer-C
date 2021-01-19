@@ -1,0 +1,4 @@
+Random: 
+http://www.chuidiang.org/clinux/funciones/rand.php
+
+

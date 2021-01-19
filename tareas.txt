@@ -1,0 +1,7 @@
+Realizados
+[X] Generar valores randoms 10 ingredientes
+
+Faltantes
+[] Documentar codigo
+[] Entender codigo base
+[] 

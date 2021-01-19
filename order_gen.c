@@ -21,8 +21,11 @@
 static int matrix[SIZE_F][SIZE_C]; //cada columna va corresponder a un ingrediente
 static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
 
-void print_queue (int matrix[SIZE_F][SIZE_C])
-{
+//char list_ingredients [] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "French fries"}; 
+
+/*Imprime los valores de la matriz */
+void print_queue (int matrix[SIZE_F][SIZE_C]){
+
     int i, j;
     int first;
 
@@ -40,36 +43,41 @@ void print_queue (int matrix[SIZE_F][SIZE_C])
         
 }
 
-void fill_queue (int matrix[SIZE_F][SIZE_C],int status[SIZE_F])
-{
+/*Llenamos la matriz Orden con ingredientes de valores random. */
+void fill_queue (int matrix[SIZE_F][SIZE_C],int status[SIZE_F]){
     int i, j;
     int first;
-    
+
+	//Considerar la forma de generar la cantidad de ingredientes para cada orden    
     for (i = 0; i < SIZE_F; i++){
-      matrix[i][0]= 2;    
-      matrix[i][1]= (rand() % (3 - 1)+1) ;    
-      matrix[i][2]= (rand() % (3 - 1)+1) ;    
-      matrix[i][3]= (rand() % (3 - 1)+1) ;    
+      matrix[i][0]= 2;    //Bread - 2 Obligatorio
+      matrix[i][1]= (rand() % (3-1) + 1); //Meat - Obligatorio de 1 a 2
+      matrix[i][2]= (rand() % 2) ;    //tomato De 0-1
+      matrix[i][3]= (rand() % 2) ;    //cebolla De 0-1
+      matrix[i][4]= (rand() % 3) ;    //Ham De 0-2
+      matrix[i][5]= (rand() % 3) ;    //Egg De 0-2
+      matrix[i][6]= (rand() % 3) ;    //Bacon De 0-2
+      matrix[i][7]= (rand() % 2) ;    //Lettuce De 0-1
+      matrix[i][8]= (rand() % 2) ;    //Mayo De 0-1
+      matrix[i][9]= (rand() % 3) ;    //Frech fries De 0-2
     }
-	
 
-//Considerar la forma de generar la cantidad de ingredientes para cada orden
-
-      
-
+    //Seteamos el estado de las bandas segun la orden procesada
     for (i = 0; i < SIZE_F; i++)   
         status[i]=0;
 }
+
+/**/
 int pending_items(int matrix[SIZE_F][SIZE_C]){
-int sum,i;
-sum=0;
+	int sum,i;
+	sum=0;
 	for (i = 0; i < SIZE_F; i++) 
 		sum=sum+matrix[i][0];
 	return(sum);
 }
 
-int next_item (int matrix[SIZE_F][SIZE_C])
-{
+/**/
+int next_item (int matrix[SIZE_F][SIZE_C]){
     int i, j;
     int sum;
     
@@ -77,11 +85,9 @@ int next_item (int matrix[SIZE_F][SIZE_C])
 	sum=sum+matrix[i][0];
     if (sum<=0)
         return (-1);
-    while(pending_items(matrix)>0)
-    {
-	i=(rand() % (SIZE_F - 1));
-	return(i);
-	
+    while(pending_items(matrix)>0){
+		i=(rand() % (SIZE_F - 1));
+		return(i);	
     }
 }
 
