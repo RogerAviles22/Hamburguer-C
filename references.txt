@@ -1,4 +1,9 @@
 Random: 
 http://www.chuidiang.org/clinux/funciones/rand.php
 
+Memset:
+https://www.journaldev.com/36863/memset-in-c
+https://www.geeksforgeeks.org/memset-c-example/
 
+Sprintf:
+https://www.geeksforgeeks.org/sprintf-in-c/

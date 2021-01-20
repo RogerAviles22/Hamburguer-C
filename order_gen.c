@@ -21,7 +21,7 @@
 static int matrix[SIZE_F][SIZE_C]; //cada columna va corresponder a un ingrediente
 static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
 
-//char list_ingredients [] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "French fries"}; 
+char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "French fries"}; 
 
 /*Imprime los valores de la matriz */
 void print_queue (int matrix[SIZE_F][SIZE_C]){
@@ -125,6 +125,11 @@ int main (int argc, char *argv[])
   }
   // -- Fin de la conexion --
 
+  	printf("\t\t---List of Ingredients---\n");
+  	for(int k=0; k < SIZE_C; k++ )
+  		printf("%s ", list_ingredients[k]);
+  	printf("\n");
+
   	// -- Inicio creacion de las 10 Ordenes --
     fill_queue(matrix,status); //Llenamos las ordenes
     print_queue (matrix); //Mostramos los datos
@@ -142,10 +147,11 @@ int main (int argc, char *argv[])
 	    memset(buffer,0,sizeof(buffer));
 		if (status[i]==0) {
 			status[i]=1;
-			sprintf(buffer,"Orden %d Ingredientes %d-%d-%d-%d",i,matrix[i][0],matrix[i][1],matrix[i][2],matrix[i][3]);
+			sprintf(buffer,"Orden %d Ingredientes %d-%d-%d-%d-%d-%d-%d-%d-%d-%d",i,matrix[i][0],matrix[i][1],matrix[i][2],matrix[i][3],matrix[i][4],matrix[i][5],matrix[i][6],matrix[i][7],matrix[i][8],matrix[i][9]);
 			rc = write(sockfd, &buffer, strlen(buffer));
 			continue;		
 		}
+		//Setea todo los valores a 0 de la orden i de estado 1.
 		if (status[i]==1) {
 		    for (int j = 0; j < SIZE_C; j++){
 		    	matrix[i][j]=0;

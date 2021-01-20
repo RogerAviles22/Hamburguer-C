@@ -1,7 +1,14 @@
 Realizados
 [X] Generar valores randoms 10 ingredientes
+[X] Muestra los ingredientes de la imagen
 
-Faltantes
+Proceso
 [] Documentar codigo
 [] Entender codigo base
-[] 
+[] Mostrar orden completa en gen_monitor
+
+Faltantes
+[] Configurar 3 bandas con su respectivo dispensador de ingredientes. 
+[] Enviar cada 3 ordenes a los dispensadores.
+[] Restar el valor de los dispensadores con el de las ordenes despachadas. 
+
