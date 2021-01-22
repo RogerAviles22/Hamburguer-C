@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
 		memset(buffer,0,sizeof(buffer));
 		rc = read(client_sockfd, &buffer,sizeof(buffer));
          	if (rc == -1) break ; 
-		printf("[Data = %s rc=%d]\n",buffer,rc) ; 		
+		printf("[Data = %s rc=%d]\n",buffer,rc); 		
 	
 	}
 
