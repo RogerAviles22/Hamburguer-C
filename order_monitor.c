@@ -27,23 +27,33 @@ int main(int argc, char *argv[]){
 	server_address.sin_port = htons(7734) ; 
 	server_len = sizeof(server_address);
 
+	//Avisar al sistema operativo de que hemos abierto un socket y queremos que asocie nuestro programa a dicho socket.
 	rc = bind(server_sockfd, (struct sockaddr *) &server_address, server_len);
 	printf("RC from bind = %d\n", rc ) ; 
 	
 	//Create a connection queue and wait for clients
+	//Avisar al sistema de que comience a atender dicha conexión de red. 
 	rc = listen(server_sockfd, 5);
 	printf("RC from listen = %d\n", rc ) ; 
 
 	client_len = sizeof(client_address);
+
+	//Pedir y aceptar las conexiones de clientes al sistema operativo.
 	client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_len);
 	printf("after accept()... client_sockfd = %d\n", client_sockfd) ; 
 
-	while(1)
-	{
+	//Escribir y recibir datos del cliente
+	while(1){
 		memset(buffer,0,sizeof(buffer));
 		rc = read(client_sockfd, &buffer,sizeof(buffer));
-         	if (rc == -1) break ; 
-		printf("[Data = %s rc=%d]\n",buffer,rc); 		
+		//if(rc == -1) break;
+     	if (rc <= 0){
+     		printf("Espera ordenes\n");
+     		sleep(1);
+     	} 
+		printf("[Data = %s rc=%d]\n",buffer,rc); 
+		/*sleep(1);
+		printf("%d\n",rc);	*/	
 	
 	}
 

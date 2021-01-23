@@ -6,14 +6,15 @@ Realizados
 [x] Enviar ordenes a los dispensadores (sin hilos) de forma random.
 [x] Restar el valor de los dispensadores con el de las ordenes despachadas. 
 [x] Sumar las hamburguesas preparadas. 
+[x] Entender codigo base.
 
 Proceso
 [] Documentar codigo.
-[] Entender codigo base.
 [] Mostrar orden completa en gen_monitor.
 
 Faltantes
-[] crear 3 hilos para los dispensadores (idea)
-[] Generar màs ordenes nuevas enviando al server.
-[] Validar que la banda este desocupada
+[] crear 3 hilos para los dispensadores (idea). En caso de hacerlos, enviar por parametro thread una estructura con el buffe, posicion de la orden y sockets. (ES de crear la funciòn con el while(pending_items) ??, si es asì, usar mutex para acceder al recurso compartido ) 
+[] Si vamos a crear 3 hilos, almacenarlos en un array para una mejor manipulacion al momento de suspenderlos?
+[] Generar màs ordenes nuevas enviando al server mediante parametros por consola.
+[] Validar que la banda este desocupada. 
 

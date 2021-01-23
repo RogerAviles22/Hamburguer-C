@@ -2,11 +2,11 @@ Random:
 http://www.chuidiang.org/clinux/funciones/rand.php
 https://es.ccm.net/faq/2830-como-generar-numeros-aleatorios-eficazmente-con-la-funcion-rand
 
-Memset:
+Memset (Usado para llenar un bloque de memoria con un valor particular):
 https://www.journaldev.com/36863/memset-in-c
 https://www.geeksforgeeks.org/memset-c-example/
 
-Sprintf:
+Sprintf (En lugar de imprimir en la consola, almacena la salida en el búfer de caracteres que se especifican en sprintf.):
 https://www.geeksforgeeks.org/sprintf-in-c/
 
 Static:
@@ -14,5 +14,12 @@ https://www.geeksforgeeks.org/static-variables-in-c/
 
 %x:
 https://stackoverflow.com/questions/15108932/c-the-x-format-specifier
+
+Queue:
+https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/
+
+
+Threads:
+https://www.um.es/earlyadopters/actividades/a3/PCD_Activity3_Session1.pdf
 
 
