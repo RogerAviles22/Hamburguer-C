@@ -2,10 +2,11 @@
  * order_generator.c
  *
  */
-#include <time.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -15,7 +16,7 @@
 #define SIZE_F    10      /* row size */ 
 #define SIZE_C    10      /* column size */ 
 #define SIZE_B    3		  /* band size*/
-#define SIZE_D	  30      /*dispensador size*/
+#define SIZE_D	  10      /*dispensador size*/
 
 static int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
 static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
@@ -48,23 +49,21 @@ void print_list_ingredients(){
 
 /*Imprime los valores de la matriz */
 void print_orders (int matrix_orders[SIZE_F][SIZE_C]){
+  int i, j;
+  int first;
 
-    int i, j;
-    int first;
-
-    for (i = 0; i < SIZE_F; i++) {
-    	printf("Orden %i: ", i);
-        printf ("[");
-        first = 1;
-        for (j = 0; j < SIZE_C; j++) {
-            if (!first)
-                printf (",");
-            printf ("%x", matrix_orders[i][j]); //IMprime en hexa, como los valores van de 0-5 no hay inconveniente.
-            first = 0;
-        }
-        printf ("]\n");
+  for (i = 0; i < SIZE_F; i++) {
+  	printf("Orden %i: ", i);
+    printf ("[");
+    first = 1;
+    for (j = 0; j < SIZE_C; j++) {
+        if (!first)
+            printf (",");
+        printf ("%x", matrix_orders[i][j]); //IMprime en hexa, como los valores van de 0-5 no hay inconveniente.
+        first = 0;
     }
-        
+    printf ("]\n");
+  }      
 }
 
 /*Llenamos la matriz Orden con ingredientes de valores random. */
@@ -111,15 +110,16 @@ void print_preparation_bands (int preparation_band[SIZE_B][SIZE_C] ){
     int i, j;
     int first;
     for (i = 0; i < SIZE_B; i++) {
-        printf ("[");
-        first = 1;
-        for (j = 0; j < SIZE_C; j++) {
-            if (!first)
-                printf (",");
-            printf ("%i", preparation_band[i][j]);
-            first = 0;
-        }
-        printf ("]\n");
+      printf("Banda #%i:  ", (i+1));
+      printf ("[");
+      first = 1;
+      for (j = 0; j < SIZE_C; j++) {
+          if (!first)
+              printf (",");
+          printf ("%i", preparation_band[i][j]);
+          first = 0;
+      }
+      printf ("]\n");
     }        
 }
 
@@ -148,6 +148,18 @@ int next_item (int matrix_orders[SIZE_F][SIZE_C]){
     }
 }
 
+int validate_contents_bands(int pos_order, int pos_band, int matrix_orders[SIZE_F][SIZE_C], int status_band [SIZE_B], int preparation_band[SIZE_B][SIZE_C]){
+  
+  if(status_band [SIZE_B] == 1) return -1;
+
+  for (int j = 0; j < SIZE_C; j++){
+    if(matrix_orders[pos_order][j] >= preparation_band[pos_band][j] && preparation_band[pos_band][j] ==0 )
+      return -1;
+  }
+
+  return 1;
+}
+
 int main (int argc, char *argv[]){
   int i;
 	struct timespec tim, tim2;
@@ -159,6 +171,7 @@ int main (int argc, char *argv[]){
 	struct sockaddr_in address;
 	int result;
 	int random_band; //Usado para almacenar valor random banda
+  int opt_news_orders=0;
 
    		// -- Inicio de la conexion -- 
   //Create socket for client. 
@@ -187,71 +200,94 @@ int main (int argc, char *argv[]){
 
   mostrarMensajeAudiencia();
 
-  print_list_ingredients();
-
+  print_list_ingredients(); 
   // -- Inicio creacion de las 10 Ordenes --
-  fill_orders(matrix_orders,status); //Llenamos las ordenes
+  fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
   print_orders (matrix_orders); //Mostramos los datos
 
 
   fill_preparation_bands(preparation_band, status_band);
-  //print_preparation_bands(preparation_band);
 
-  //printf("%d",pending_items(matrix_orders));
   //Muestra los datos cada 0.5 seg mientras haya ordenes pendientes
-  while(pending_items(matrix_orders)>0){
-  nanosleep(&tim , &tim2); 
-  i=next_item(matrix_orders);
+do{
 
-  // -- Iniciamos evaluacion de los estados 0 no enviado, 1 en proceso, 2 finalizado
-  	if (status[i]==2) {
-   		while(status[i++]!=2);
+  if(opt_news_orders==1){ //Si es la orden superior a 10, crea nuevas ordenes.
+      fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
+      print_orders (matrix_orders); //Mostramos los datos
+  }
+
+  while(pending_items(matrix_orders)>0){
+
+    nanosleep(&tim , &tim2); 
+    i=next_item(matrix_orders);
+
+    // -- Iniciamos evaluacion de los estados 0 no enviado, 1 en proceso, 2 finalizado
+    if (status[i]==2) {
+      while(status[i++]!=2);
     }
     
-   memset(buffer,0,sizeof(buffer)); //Llenamos con ceros el buffer. 
-    //Envìa a order_monitor la orden
-    //Escribir y recibir datos
-  if (status[i]==0) {
-  	status[i]=1;
-  	//Almacenamos el valor a escribir en el socket. 
-  	sprintf(buffer,"Orden %d Ingredientes %d-%d-%d-%d-%d-%d-%d-%d-%d-%d",i,matrix_orders[i][0],matrix_orders[i][1],matrix_orders[i][2],matrix_orders[i][3],matrix_orders[i][4],matrix_orders[i][5],matrix_orders[i][6],matrix_orders[i][7],matrix_orders[i][8],matrix_orders[i][9]);
-  	rc = write(sockfd, &buffer, strlen(buffer));
-  	continue;		
-  }		
+     memset(buffer,0,sizeof(buffer)); //Llenamos con ceros el buffer. 
+      //Envìa a order_monitor la orden
+      //Escribir y recibir datos
+    if (status[i]==0) {
+      status[i]=1;
+      //Almacenamos el valor a escribir en el socket. 
+      sprintf(buffer,"Orden %d Ingredientes %d-%d-%d-%d-%d-%d-%d-%d-%d-%d",i,matrix_orders[i][0],matrix_orders[i][1],matrix_orders[i][2],matrix_orders[i][3],matrix_orders[i][4],matrix_orders[i][5],matrix_orders[i][6],matrix_orders[i][7],matrix_orders[i][8],matrix_orders[i][9]);
+      rc = write(sockfd, &buffer, strlen(buffer));
+      continue;   //Forza a continuar el sgte while
+    }   
 
-  //Si el estado de la orden es *en proceso*
-  if (status[i]==1) {
-  	random_band = (rand() % SIZE_B);
-  	status_band[random_band] = 1;
-  	//Restamos los ingredientes
-  	for (int m = 0; m < SIZE_C; m++)
-  	 	preparation_band[random_band][m] -= matrix_orders[i][m];
+    //Si el estado de la orden es *en proceso*
+    if (status[i]==1) {
 
-  	
-  	prepared_burguer_counter[random_band]+=1; //Aumentamos el valor de hamburguesas preparados
-    sprintf(buffer,"La banda %i prepara orden %i",(random_band+1), i);
-    rc = write(sockfd, &buffer, strlen(buffer));
+      int b_vacios_dispensadores = 0; //En caso que quede dentro del bucle validate_contents_bands, se sospecha dispensadores vacios
+      do{
+        random_band = (rand() % SIZE_B);
+        b_vacios_dispensadores +=1;
+      }while(validate_contents_bands(i, random_band, matrix_orders, status_band, preparation_band)<0 && b_vacios_dispensadores<5);
 
-  	//Setea todo los valores a 0 de la orden i.
-  	for (int j = 0; j < SIZE_C; j++){
-      matrix_orders[i][j]=0;
-  		status[i]=2;
-  	}
+      if(b_vacios_dispensadores >=5){
+        printf("╔══════════════════════════╗\n");
+        printf("║  ALERTA  DISPENSADOR %i   ║\n", random_band);
+        printf("╚══════════════════════════╝\n");
+        break;
+      }
 
-  	status_band[random_band] = 0;			
-  	}
 
-  	// -- Fin de la evaluacion --    
+      status_band[random_band] = 1;
+      //Restamos los ingredientes
+      for (int m = 0; m < SIZE_C; m++)
+        preparation_band[random_band][m] -= matrix_orders[i][m];
+
+      
+      prepared_burguer_counter[random_band]+=1; //Aumentamos el valor de hamburguesas preparados
+      sprintf(buffer,"La banda %i prepara orden %i",(random_band+1), i);
+      rc = write(sockfd, &buffer, strlen(buffer));
+
+      //Setea todo los valores a 0 de la orden i.
+      for (int j = 0; j < SIZE_C; j++){
+        matrix_orders[i][j]=0;
+        status[i]=2;
+      }
+
+      status_band[random_band] = 0;     
+    }
+      // -- Fin de la evaluacion --    
   }
+
+  printf("[\t--Estados de la bandas---]\n");
+  print_preparation_bands(preparation_band);
+  printf("Hamburguesas preparadas por banda\n" );
+  for (int m = 0; m < SIZE_B; m++)
+    printf("La banda %i preparo %i hamburguesas.\n", (m+1), (prepared_burguer_counter[m]));
+
+  printf("¿Ingresar 10 nuevos pedidos?\nSí = 1\nNo = 0\nREspuesta : ");
+  scanf("%i",&opt_news_orders); //Leyendo el número solicitado
+}while(opt_news_orders==1);
 
   /*sprintf(buffer,"La banda %i prepara orden %i",(random_band+1), i);
   rc = write(sockfd, &buffer, strlen(buffer));*/
 
-  printf("--Estados de la bandas---\n");
-  print_preparation_bands(preparation_band);
-  printf("Hamburguesas preparadas por banda\n" );
-  for (int m = 0; m < SIZE_B; m++)
-  	printf("La banda %i preparo %i hamburguesas.\n", (m+1), (prepared_burguer_counter[m]));
 
   close(result); //Cerramos la conexion con el socket
   return 0;

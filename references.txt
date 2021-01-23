@@ -18,8 +18,13 @@ https://stackoverflow.com/questions/15108932/c-the-x-format-specifier
 Queue:
 https://www.geeksforgeeks.org/queue-set-1introduction-and-array-implementation/
 
-
 Threads:
 https://www.um.es/earlyadopters/actividades/a3/PCD_Activity3_Session1.pdf
+
+strstr
+https://www.tutorialspoint.com/c_standard_library/c_function_strstr.htm
+
+Scanf:
+https://www.tutorialspoint.com/c_standard_library/c_function_scanf.htm
 
 

@@ -48,10 +48,22 @@ int main(int argc, char *argv[]){
 		rc = read(client_sockfd, &buffer,sizeof(buffer));
 		//if(rc == -1) break;
      	if (rc <= 0){
-     		printf("Espera ordenes\n");
+     		/*printf("Espera ordenes\n");
+     		sleep(1);*/
+     		printf("Apagando máquina\n");
      		sleep(1);
+     		printf("¡Adiòs!\n");
+     		sleep(1);
+     		break;
      	} 
-		printf("[Data = %s rc=%d]\n",buffer,rc); 
+		if(strstr(buffer, "banda") != NULL){
+			printf("╠══ %s ,rc=%d ══╣\n",buffer,rc); 
+		}
+     	else if (strstr(buffer, "Orden") != NULL) {
+			printf("■ %s ,rc=%d\n",buffer,rc); 		    
+		}else{
+			printf("%s ,rc=%d\n", buffer, rc);
+		}
 		/*sleep(1);
 		printf("%d\n",rc);	*/	
 	
