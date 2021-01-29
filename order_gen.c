@@ -16,7 +16,7 @@
 #define SIZE_F    10      /* row size */ 
 #define SIZE_C    10      /* column size */ 
 #define SIZE_B    3		  /* band size*/
-#define SIZE_D	  10      /*dispensador size*/
+#define SIZE_D	  20      /*dispensador size*/
 
 static int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
 static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
@@ -281,7 +281,7 @@ do{
   for (int m = 0; m < SIZE_B; m++)
     printf("La banda %i preparo %i hamburguesas.\n", (m+1), (prepared_burguer_counter[m]));
 
-  printf("¿Ingresar 10 nuevos pedidos?\nSí = 1\nNo = 0\nREspuesta : ");
+  printf("¿Ingresar 10 nuevos pedidos?\nSí = 1\nNo = 0\nRespuesta : ");
   scanf("%i",&opt_news_orders); //Leyendo el número solicitado
 }while(opt_news_orders==1);
 
