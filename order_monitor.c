@@ -9,19 +9,20 @@
 #include <unistd.h>
 #include <pthread.h>
 
-
 #define SIZE_F    10      /* row size */ 
-#define SIZE_B    3		  /* band size*/
+#define SIZE_B    3  /* band size*/
 #define SIZE_C    10      /* column size */ 
-#define SIZE_D	  20      /*dispensador size*/
+#define SIZE_D	  10      /*dispensador size*/
 
-static int preparation_band[SIZE_B][SIZE_C]; //Matriz con las cantidad de cintas y sus respectivos ingredientes
-static int status_band [SIZE_B]; // 0 en reposo (sin orden), 1 en ejecución, 2 pausado
+int preparation_band[SIZE_B][SIZE_C]; //Matriz con las cantidad de cintas y sus respectivos ingredientes
+int status_band [SIZE_B]; // 0 en reposo (sin orden), 1 en ejecución, 2 pausado
 
-static int prepared_burguer_counter[SIZE_B];
+int prepared_burguer_counter[SIZE_B];
 
-static int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
-static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado, 3 encolado
+int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
+int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado, 3 encolado
+
+pthread_mutex_t mutex= PTHREAD_MUTEX_INITIALIZER;
  
 /*Llenamos la matriz Banda de Preparacion con ingredientes de valores iniciales fijos de SIZE_D. */
 void fill_preparation_bands(int preparation_band[SIZE_B][SIZE_C], int status_band[SIZE_B]){
@@ -78,14 +79,20 @@ void print_orders (int matrix_orders[SIZE_F][SIZE_C]){
 /*SI LA BANDA ESTÀ OCUPADA o SI LOS INGREDIENTES COINCIDEN Y SU VALOR ES 0, ENTONCES RETORNA -1*/
 int validate_contents_bands(int pos_order, int pos_band, int matrix_orders[SIZE_F][SIZE_C], int status_band [SIZE_B], int preparation_band[SIZE_B][SIZE_C]){
   
-  if(status_band [SIZE_B] == 1) return -1;
+  /*if(status_band [SIZE_B] == 1) return -1;
 
   for (int j = 0; j < SIZE_C; j++){
     if(matrix_orders[pos_order][j] >= preparation_band[pos_band][j] && preparation_band[pos_band][j] ==0 )
       return -1;
   }
-
-  return 1;
+  return 1;*/
+	if(status_band [SIZE_B] == 0){ 
+		for (int j = 0; j < SIZE_C; j++){
+		    if(matrix_orders[pos_order][j] >= preparation_band[pos_band][j] && preparation_band[pos_band][j] ==0 )
+		    	return -1;
+			}
+		}
+	return 1;
 }
 
 /*Retorna la cantidad de las ordenes pendientes*/
@@ -98,25 +105,90 @@ int pending_items(int matrix_orders[SIZE_F][SIZE_C]){
 }
 
 /*Retorna -1 si ocurre un error al sumar los panes
-Retorna un i random que representa la orden que aùn no haya sido despachada*/
+Retorna un i drepresenta la orden que aùn no haya sido despachada*/
 int next_item (int matrix_orders[SIZE_F][SIZE_C]){
-    int i, j;
+    int i;
     int sum;
+
+    if(pending_items(matrix_orders)<=0)
+    	return -1;
     
-    for (i = 0; i < SIZE_F; i++)
+    for (i = 0; i < SIZE_F; i++){
 		sum=sum+matrix_orders[i][0];
-    if (sum<=0)
-        return (-1);
-    while(pending_items(matrix_orders)>0){
-		i=(rand() % (SIZE_F - 1)); //Va de 0 - 9 
-		return(i);	
+		if(status[i]==0 && sum>0 ){	
+			status[i]==1; 		
+			return i;
+		}
     }
+}
+
+void *band_thread(void *arg){
+	int order ;
+	int num_band= *((int *)arg); //Num de banda dispensadora
+	struct timespec tim, tim2;
+	tim.tv_sec = 0;
+	tim.tv_nsec = 500000000L; //medio segundo
+
+	while(pending_items(matrix_orders)>0){
+
+			pthread_mutex_lock(&mutex);
+		    order=next_item(matrix_orders);
+		    pthread_mutex_unlock(&mutex);
+
+		    if (order<0)
+		    	break;		    
+
+		    // -- Iniciamos evaluacion de los estados 0 no enviado, 1 en proceso, 2 finalizado
+		    if (status[order]==2) 
+		    	while(status[order++]!=2);
+
+		    if (status[order]==0) 
+				status[order]=1;		       
+
+		    //Si el estado de la orden es *en proceso*
+		    if (status[order]==1) {
+		    	int b_vacios_dispensadores = 0; //En caso que quede dentro del bucle validate_contents_bands, se SOSPECHA dispensadores vacios
+				do{
+					b_vacios_dispensadores +=1;
+				}while(validate_contents_bands(order, num_band, matrix_orders, status_band, preparation_band)<0 && b_vacios_dispensadores<5);
+
+				if(b_vacios_dispensadores >=5){
+					printf("╔══════════════════════════╗\n");
+					printf("║	ALERTA  BANDA %i   ║\n", num_band);
+					printf("╚══════════════════════════╝\n");
+					break;
+					//continue;
+				}else{
+					//pthread_mutex_lock(&mutex);
+					status_band[num_band] = 1;
+			    	//pthread_mutex_unlock(&mutex);
+
+					//Restamos los ingredientes
+					for (int i = 0; i < SIZE_C; i++)
+						preparation_band[num_band][i] -= matrix_orders[order][i];
+
+			    	//pthread_mutex_lock(&mutex);
+					prepared_burguer_counter[num_band]+=1; //Aumentamos el valor de hamburguesas preparados
+			    	//pthread_mutex_unlock(&mutex);
+					
+					printf("La banda %i prepara orden %i\n",(num_band+1), order);
+					nanosleep(&tim , &tim2); 
+
+					for (int j = 0; j < SIZE_C; j++){
+						matrix_orders[order][j]=0;
+						status[order]=2;
+					}
+					status_band[num_band] = 0;    
+				}		    	 
+		    }
+		      // -- Fin de la evaluacion --    
+  		}
+  		return NULL;
 }
 
 
 
 int main(int argc, char *argv[]){
-	
 	//Declaring process variables.
 	int server_sockfd, client_sockfd;
 	int server_len ; 
@@ -124,14 +196,12 @@ int main(int argc, char *argv[]){
 	unsigned client_len;
 	struct sockaddr_in server_address;
 	struct sockaddr_in client_address;
-	char buffer[50]; 
-	int random_band; //Usado para almacenar valor random banda
 	int order, vendidos = 10;
-	struct timespec tim, tim2;
-	tim.tv_sec = 0;
-	tim.tv_nsec = 500000000L; //medio segundo
 
-	//pthread_t tid_bands[SIZE_B]; //Hilos como Bandas
+	//Hilos como Bandas
+	pthread_t tid_bands1; 
+	pthread_t tid_bands2;  
+	pthread_t tid_bands3;
 
 	//Remove any old socket and create an unnamed socket for the server.
 	server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -144,11 +214,9 @@ int main(int argc, char *argv[]){
 	rc = bind(server_sockfd, (struct sockaddr *) &server_address, server_len);
 	printf("RC from bind = %d\n", rc ) ; 
 	
-	//Create a connection queue and wait for clients
-	//Avisar al sistema de que comience a atender dicha conexión de red. 
+	//Create a connection queue and wait for clients. Avisar al sistema de que comience a atender dicha conexión de red. 	
 	rc = listen(server_sockfd, 5);
 	printf("RC from listen = %d\n", rc ) ; 
-
 	client_len = sizeof(client_address);
 
 	//Pedir y aceptar las conexiones de clientes al sistema operativo.
@@ -162,107 +230,53 @@ int main(int argc, char *argv[]){
 
 	//Escribir y recibir datos del cliente
 	while(1){
-		//memset(matrix_orders,0,sizeof(matrix_orders));	
+
 		memset(matrix_orders,0,sizeof(matrix_orders));	
 		rc = read(client_sockfd, &matrix_orders,sizeof(matrix_orders)); //1. Cargamos la matriz orden
 		if(rc>0){
-			//print_orders(matrix_orders);
 			printf("╠══ Turno %i ══╣\n", vendidos);
 			read(client_sockfd, &status,sizeof(status)); //2. Cargamos la matriz status		
 			vendidos+=10;		
 		}
 
-		/*memset(buffer,0,sizeof(buffer));
-		rc = read(client_sockfd, &buffer,sizeof(buffer));*/
-		//if(rc == -1) break;
-
      	if (rc <= 0){
-     		/*printf("Espera ordenes\n");
-     		sleep(1);*/
      		printf("Apagando máquina\n");
      		sleep(1);
-     		printf("¡Adiòs!\n");
+     		printf("¡Adiós!\n");
      		sleep(1);
      		break;
      	} 
 
-     	while(pending_items(matrix_orders)>0){
+     	int pos0 =0, pos1 =1, pos2 =2;
 
-		    //nanosleep(&tim , &tim2); 
-		    order=next_item(matrix_orders);
+     	pthread_create(&tid_bands1, NULL, band_thread, &pos0);
+     	pthread_create(&tid_bands2, NULL, band_thread, &pos1);
+     	pthread_create(&tid_bands3, NULL, band_thread, &pos2);
 
-		    // -- Iniciamos evaluacion de los estados 0 no enviado, 1 en proceso, 2 finalizado
-		    if (status[order]==2) {
-		      while(status[order++]!=2);
-		    }
-		    
-		    memset(buffer,0,sizeof(buffer)); //Llenamos con ceros el buffer. 
-		      //Envìa a order_monitor la orden
-		      //Escribir y recibir datos
-		    if (status[order]==0) {
-		      status[order]=1;
-		      //Almacenamos el valor a escribir en el socket. 
-		      /*sprintf(buffer,"Orden %d Ingredientes %d-%d-%d-%d-%d-%d-%d-%d-%d-%d",i,matrix_orders[i][0],matrix_orders[i][1],matrix_orders[i][2],matrix_orders[i][3],matrix_orders[i][4],matrix_orders[i][5],matrix_orders[i][6],matrix_orders[i][7],matrix_orders[i][8],matrix_orders[i][9]);
-		      rc = write(sockfd, &buffer, strlen(buffer));*/
-		      continue;   //Forza a continuar el sgte while
-		    }   
+     	//printf("HILOS CREADOS!\n");
 
-		    //Si el estado de la orden es *en proceso*
-		    if (status[order]==1) {
-		    	int b_vacios_dispensadores = 0; //En caso que quede dentro del bucle validate_contents_bands, se SOSPECHA dispensadores vacios
-				do{
-					random_band = (rand() % SIZE_B);
-					b_vacios_dispensadores +=1;
-				}while(validate_contents_bands(order, random_band, matrix_orders, status_band, preparation_band)<0 && b_vacios_dispensadores<5);
+		pthread_join(tid_bands1, NULL);
+		pthread_join(tid_bands2, NULL);
+		pthread_join(tid_bands3, NULL);
 
-				if(b_vacios_dispensadores >=5){
-					printf("╔══════════════════════════╗\n");
-					printf("║  ALERTA  DISPENSADOR %i   ║\n", random_band);
-					printf("╚══════════════════════════╝\n");
-					break;
-				}
+     	/*for (int i = 0; i < SIZE_B; i++){
+     		printf("Enviado banda %i\n", i );
+     		pthread_create(&tid_bands[i], NULL, band_thread, &i);
+     	}
+     	
+     	for (int i = 0; i < SIZE_B; i++){
+     		pthread_join(tid_bands[i], NULL);
+     	}*/
 
-				status_band[random_band] = 1;
-				//Restamos los ingredientes
-				for (int m = 0; m < SIZE_C; m++)
-					preparation_band[random_band][m] -= matrix_orders[order][m];
-
-
-				prepared_burguer_counter[random_band]+=1; //Aumentamos el valor de hamburguesas preparados
-				
-				printf("La banda %i prepara orden %i\n",(random_band+1), order);
-				nanosleep(&tim , &tim2); 
-				/*sprintf(buffer,"Disfrute su pedido Orden #%i", order);
-		        write(client_sockfd, &buffer, strlen(buffer));*/
-
-				//nanosleep(&tim , &tim2); 
-				//rc = write(sockfd, &buffer, strlen(buffer));
-
-				//Setea todo los valores a 0 de la orden i.
-				for (int j = 0; j < SIZE_C; j++){
-					matrix_orders[order][j]=0;
-					status[order]=2;
-				}
-
-				status_band[random_band] = 0;     
-		    }
-		      // -- Fin de la evaluacion --    
-  		}
+     	
   		printf("[\t--Estados de la bandas---]\n");
 		print_preparation_bands(preparation_band);
 		printf("Hamburguesas preparadas por banda\n" );
-		for (int m = 0; m < SIZE_B; m++)
-			printf("La banda %i preparo %i hamburguesas.\n", (m+1), (prepared_burguer_counter[m]));
-
-
+		for (int i = 0; i < SIZE_B; i++)
+			printf("La banda %i preparo %i hamburguesas.\n", (i+1), (prepared_burguer_counter[i]));		
      	
 		/*if(strstr(buffer, "banda") != NULL){
 			printf("╠══ %s ,rc=%d ══╣\n",buffer,rc); 
-		}
-     	else if (strstr(buffer, "Orden") != NULL) {
-			printf("■ %s ,rc=%d\n",buffer,rc); 		    
-		}else{
-			printf("%s ,rc=%d\n", buffer, rc);
 		}*/
 	
 	}

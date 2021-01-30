@@ -16,8 +16,8 @@
 #define SIZE_F    10      /* row size */ 
 #define SIZE_C    10      /* column size */ 
 
-static int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
-static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
+int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
+int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
 
 char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "French-Fries"}; 
 
@@ -56,7 +56,7 @@ void print_orders (int matrix_orders[SIZE_F][SIZE_C]){
     for (j = 0; j < SIZE_C; j++) {
         if (!first)
             printf (",");
-        printf ("%x", matrix_orders[i][j]); //IMprime en hexa, como los valores van de 0-5 no hay inconveniente.
+        printf ("%x", matrix_orders[i][j]); //Imprime en hexa, como los valores van de 0-5 no hay inconveniente.
         first = 0;
     }
     printf ("]\n");
