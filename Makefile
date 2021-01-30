@@ -4,7 +4,7 @@ order_gen: order_gen.c
 	gcc order_gen.c -o order_gen 
 
 order_monitor: order_monitor.c
-	gcc order_monitor.c -o order_monitor 
+	gcc order_monitor.c -o order_monitor -lpthread
 
 clean:
 	rm order_gen order_monitor

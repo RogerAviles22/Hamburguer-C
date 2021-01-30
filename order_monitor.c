@@ -7,6 +7,8 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
+
 
 #define SIZE_F    10      /* row size */ 
 #define SIZE_B    3		  /* band size*/
@@ -73,6 +75,7 @@ void print_orders (int matrix_orders[SIZE_F][SIZE_C]){
   }      
 }
 
+/*SI LA BANDA ESTÀ OCUPADA o SI LOS INGREDIENTES COINCIDEN Y SU VALOR ES 0, ENTONCES RETORNA -1*/
 int validate_contents_bands(int pos_order, int pos_band, int matrix_orders[SIZE_F][SIZE_C], int status_band [SIZE_B], int preparation_band[SIZE_B][SIZE_C]){
   
   if(status_band [SIZE_B] == 1) return -1;
@@ -110,6 +113,8 @@ int next_item (int matrix_orders[SIZE_F][SIZE_C]){
     }
 }
 
+
+
 int main(int argc, char *argv[]){
 	
 	//Declaring process variables.
@@ -125,6 +130,8 @@ int main(int argc, char *argv[]){
 	struct timespec tim, tim2;
 	tim.tv_sec = 0;
 	tim.tv_nsec = 500000000L; //medio segundo
+
+	//pthread_t tid_bands[SIZE_B]; //Hilos como Bandas
 
 	//Remove any old socket and create an unnamed socket for the server.
 	server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -202,7 +209,7 @@ int main(int argc, char *argv[]){
 
 		    //Si el estado de la orden es *en proceso*
 		    if (status[order]==1) {
-		    	int b_vacios_dispensadores = 0; //En caso que quede dentro del bucle validate_contents_bands, se sospecha dispensadores vacios
+		    	int b_vacios_dispensadores = 0; //En caso que quede dentro del bucle validate_contents_bands, se SOSPECHA dispensadores vacios
 				do{
 					random_band = (rand() % SIZE_B);
 					b_vacios_dispensadores +=1;

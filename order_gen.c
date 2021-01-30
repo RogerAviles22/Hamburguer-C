@@ -21,8 +21,6 @@ static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
 
 char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "French-Fries"}; 
 
-
-
 void mostrarMensajeAudiencia(){
   printf("\t¡Bienvenidos a BURGUER-MAKING MACHINE V2!\n");
   printf("\t\t\t_/¨¨¨¨¨\\_\n");
@@ -47,6 +45,9 @@ void print_list_ingredients(){
 void print_orders (int matrix_orders[SIZE_F][SIZE_C]){
   int i, j;
   int first;
+  struct timespec tim, tim2;
+  tim.tv_sec = 0;
+  tim.tv_nsec = 500000000L; //medio segundo
 
   for (i = 0; i < SIZE_F; i++) {
   	printf("Orden %i: ", i);
@@ -59,7 +60,8 @@ void print_orders (int matrix_orders[SIZE_F][SIZE_C]){
         first = 0;
     }
     printf ("]\n");
-  }      
+    nanosleep(&tim , &tim2);  
+  }     
 }
 
 /*Llenamos la matriz Orden con ingredientes de valores random. */
@@ -78,7 +80,7 @@ void fill_orders (int matrix_orders[SIZE_F][SIZE_C],int status[SIZE_F]){
       matrix_orders[i][6]= (rand() % 3) ;    //Bacon De 0-2
       matrix_orders[i][7]= (rand() % 2) ;    //Lettuce De 0-1
       matrix_orders[i][8]= (rand() % 2) ;    //Mayo De 0-1
-      matrix_orders[i][9]= (rand() % 3) ;    //Frech fries De 0-2
+      matrix_orders[i][9]= (rand() % 3) ;    //French fries De 0-2
     }
 
     //Seteamos el estado de las bandas segun la orden procesada
@@ -144,6 +146,7 @@ do{
   printf("¿Ingresar 10 nuevos pedidos?\nSí = 1\nNo = 0\nRespuesta : ");
   scanf("%i",&opt_news_orders); //Leyendo el número solicitado
 }while(opt_news_orders==1);
+
   printf("Vuelva pronto!\n");
   close(result); //Cerramos la conexion con el socket
   return 0;
