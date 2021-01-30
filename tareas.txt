@@ -11,7 +11,9 @@ Realizados
 [x] Muestra en order_monitor la orden y banda utilizada
 [x] Pregunta en order_gen si agrea 10 ordenes extras.
 [x] Valida que la banda y el dispensador cumpla requisito
- 
+
+[x] Generar màs ordenes nuevas enviando al server mediante parametros por consola.
+[x] Enviar las variables correspondientes a cliente y server. 
 
 Proceso
 [] Documentar codigo.
@@ -20,8 +22,7 @@ Proceso
 [] Validar que la banda este desocupada. 
 
 Faltantes
-[] Enviar las variables correspondientes a cliente y server. 
 [] crear 3 hilos para los dispensadores (idea). En caso de hacerlos, enviar por parametro thread una estructura con el buffe, posicion de la orden y sockets. (ES de crear la funciòn con el while(pending_items) ??, si es asì, usar mutex para acceder al recurso compartido ) 
 [] Si vamos a crear 3 hilos, almacenarlos en un array para una mejor manipulacion al momento de suspenderlos?
-[] Generar màs ordenes nuevas enviando al server mediante parametros por consola.
+
 

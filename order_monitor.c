@@ -19,7 +19,7 @@ static int status_band [SIZE_B]; // 0 en reposo (sin orden), 1 en ejecución, 2 
 static int prepared_burguer_counter[SIZE_B];
 
 static int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
-static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
+static int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado, 3 encolado
  
 /*Llenamos la matriz Banda de Preparacion con ingredientes de valores iniciales fijos de SIZE_D. */
 void fill_preparation_bands(int preparation_band[SIZE_B][SIZE_C], int status_band[SIZE_B]){
@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in client_address;
 	char buffer[50]; 
 	int random_band; //Usado para almacenar valor random banda
-	int order;
+	int order, vendidos = 10;
 	struct timespec tim, tim2;
 	tim.tv_sec = 0;
 	tim.tv_nsec = 500000000L; //medio segundo
@@ -159,8 +159,10 @@ int main(int argc, char *argv[]){
 		memset(matrix_orders,0,sizeof(matrix_orders));	
 		rc = read(client_sockfd, &matrix_orders,sizeof(matrix_orders)); //1. Cargamos la matriz orden
 		if(rc>0){
-			print_orders(matrix_orders);
-			read(client_sockfd, &status,sizeof(status)); //1. Cargamos la matriz status				
+			//print_orders(matrix_orders);
+			printf("╠══ Turno %i ══╣\n", vendidos);
+			read(client_sockfd, &status,sizeof(status)); //2. Cargamos la matriz status		
+			vendidos+=10;		
 		}
 
 		/*memset(buffer,0,sizeof(buffer));
@@ -187,7 +189,7 @@ int main(int argc, char *argv[]){
 		      while(status[order++]!=2);
 		    }
 		    
-		    //memset(buffer,0,sizeof(buffer)); //Llenamos con ceros el buffer. 
+		    memset(buffer,0,sizeof(buffer)); //Llenamos con ceros el buffer. 
 		      //Envìa a order_monitor la orden
 		      //Escribir y recibir datos
 		    if (status[order]==0) {
@@ -220,7 +222,12 @@ int main(int argc, char *argv[]){
 
 
 				prepared_burguer_counter[random_band]+=1; //Aumentamos el valor de hamburguesas preparados
-				printf(buffer,"La banda %i prepara orden %i",(random_band+1), order);
+				
+				printf("La banda %i prepara orden %i\n",(random_band+1), order);
+				nanosleep(&tim , &tim2); 
+				/*sprintf(buffer,"Disfrute su pedido Orden #%i", order);
+		        write(client_sockfd, &buffer, strlen(buffer));*/
+
 				//nanosleep(&tim , &tim2); 
 				//rc = write(sockfd, &buffer, strlen(buffer));
 
