@@ -27,4 +27,11 @@ https://www.tutorialspoint.com/c_standard_library/c_function_strstr.htm
 Scanf:
 https://www.tutorialspoint.com/c_standard_library/c_function_scanf.htm
 
+Strlen y sizeof:
+https://stackoverrun.com/es/q/2227740#:~:text=strlen%28%29%20se%20utiliza%20para%20obtener%20la%20longitud%20de,No%20le%20importa%20el%20valor%20de%20la%20variable.
+https://stackoverflow.com/questions/9937181/sizeof-vs-strlen
+
+Local, global y static:
+https://overiq.com/c-programming-101/local-global-and-static-variables-in-c/
+
 
