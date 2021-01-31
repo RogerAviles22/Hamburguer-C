@@ -198,6 +198,8 @@ int main(int argc, char *argv[]){
 	struct sockaddr_in client_address;
 	int order, vendidos = 10;
 
+	int opt_action;
+
 	//Hilos como Bandas
 	pthread_t tid_bands1; 
 	pthread_t tid_bands2;  
@@ -249,15 +251,20 @@ int main(int argc, char *argv[]){
 
      	int pos0 =0, pos1 =1, pos2 =2;
 
-     	pthread_create(&tid_bands1, NULL, band_thread, &pos0);
-     	pthread_create(&tid_bands2, NULL, band_thread, &pos1);
-     	pthread_create(&tid_bands3, NULL, band_thread, &pos2);
+     	if(status_band[pos0]!=2)
+     		pthread_create(&tid_bands1, NULL, band_thread, &pos0);
+     	if(status_band[pos1]!=2)
+     		pthread_create(&tid_bands2, NULL, band_thread, &pos1);
+     	if(status_band[pos2]!=2)
+     		pthread_create(&tid_bands3, NULL, band_thread, &pos2);
 
      	//printf("HILOS CREADOS!\n");
-
-		pthread_join(tid_bands1, NULL);
-		pthread_join(tid_bands2, NULL);
-		pthread_join(tid_bands3, NULL);
+     	if(status_band[pos0]!=2)
+			pthread_join(tid_bands1, NULL);
+		if(status_band[pos1]!=2)
+			pthread_join(tid_bands2, NULL);
+		if(status_band[pos2]!=2)
+			pthread_join(tid_bands3, NULL);
 
      	/*for (int i = 0; i < SIZE_B; i++){
      		printf("Enviado banda %i\n", i );

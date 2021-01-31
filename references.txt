@@ -34,4 +34,9 @@ https://stackoverflow.com/questions/9937181/sizeof-vs-strlen
 Local, global y static:
 https://overiq.com/c-programming-101/local-global-and-static-variables-in-c/
 
+isdigit
+https://www.programiz.com/c-programming/library-function/ctype.h/isdigit#:~:text=%20C%20isdigit%20%28%29%20%201%20Function%20Prototype,Result%20when%20non-numeric%20character%20is%20passed%3A...%20More%20
+
+atoi:
+https://www.tutorialspoint.com/c_standard_library/c_function_atoi.htm
 

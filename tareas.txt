@@ -23,10 +23,11 @@ Proceso
 [] crear 3 hilos para los dispensadores trabaje en conjunto a la funciòn while(pending_items) 
 [] usar mutex para acceder al recurso compartido, en este caso a la matriz de ordenes.  
 [] Si vamos a crear 3 hilos, almacenarlos en un array para una mejor manipulacion al momento de suspenderlos?
+[] La orden obtenida, se le cambia su valor estado en next item.
 
 Faltantes
 [] Manipular estados de la banda con otro proceso.
-[] La orden obtenida, se le cambia su valor estado en next item.
+[] Manejar procesos por id.
 
 
 
