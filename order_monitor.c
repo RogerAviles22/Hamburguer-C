@@ -184,15 +184,10 @@ int main(){
 	int server_len ; 
 	int rc ; 
 	unsigned client_len;
-	int order, vendidos = 10;
-	int buffer[50];
-
-	int numeroClientes = 0;			/* Número clientes conectados */
+	int vendidos = 10;
 	fd_set current_sockets, ready_sockets;	/* Descriptores de interes para select() */
 
-	pid_t childpid;
-
-	int opt_action;
+	int opt_action; //Se actualiza dependiendo del id obtenido.
 
 	//Hilos como Bandas
 	pthread_t tid_bands1; 
@@ -225,19 +220,18 @@ int main(){
 
   	fill_preparation_bands(preparation_band, status_band);
  	print_preparation_bands(preparation_band);
-  	srand(time(NULL)); //Para obtener distintos tipos de valores random en cada ejecucion
 
   	int max_socket_so_far = 0;
-	//Initialize my current set
+
 	FD_ZERO(&current_sockets);
 	FD_SET(server_sockfd, &current_sockets);
 	max_socket_so_far = server_sockfd; 
 
 	//Escribir y recibir datos del cliente
 	while(1){
-		//because select is destructive
-		ready_sockets = current_sockets;
 
+		ready_sockets = current_sockets;
+		//Es activado cuando ingresa un nuevo cliente o el cliente registrado desea realizar alguna acciòn.
 		if(select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL)<0){
 			perror("Error en select");
 			exit(-1);
@@ -246,7 +240,7 @@ int main(){
 		for (int i = 0; i <= max_socket_so_far; i++){
 			if(FD_ISSET(i, &ready_sockets)){
 				if(i==server_sockfd){
-					//esta es la nueva conexión
+					//Esta es la nueva conexión
 					//Pedir y aceptar las conexiones de clientes al sistema operativo.
 					client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_len);
 					if(client_sockfd < 0){

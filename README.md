@@ -29,7 +29,7 @@ Genera y envía y órdenes
 ./order_monitor
 ```
 ## Uso para order_band
-Administra y suministra las bandas. Funcionalidad implementada pero falta que el server lo lea en paralelo.
+Administra y suministra las bandas. Funcionalidad implementada.
 ```
 ./order_band <option> <number>
 ```

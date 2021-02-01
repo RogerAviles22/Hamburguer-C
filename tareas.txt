@@ -1,7 +1,7 @@
 Realizados
 [X] Generar valores randoms distintos en los 10 ingredientes
-[X] Muestra los ingredientes de la imagen
-[x] Crea banda de preparacion con 30 ingredientes fijos
+[X] Muestra los ingredientes del array.
+[x] Crea banda de preparacion con 10 ingredientes fijos
 [x] Configurar 3 bandas con su respectivo dispensador de ingredientes. 
 [x] Enviar ordenes a los dispensadores (sin hilos) de forma random.
 [x] Restar el valor de los dispensadores con el de las ordenes despachadas. 
@@ -9,22 +9,22 @@ Realizados
 [x] Entender codigo base.
 
 [x] Muestra en order_monitor la orden y banda utilizada
-[x] Pregunta en consola a order_gen si agrega 10 ordenes extras.
-[x] Valida que la banda y el dispensador cumpla requisito
+[x] Valida que la banda y el dispensador cumpla requisito de la orden.
 
-[x] Generar màs ordenes nuevas enviando al server mediante parametros por consola.
 [x] Enviar las variables correspondientes a cliente y server. 
 [x] Mostrar orden procesada en gen_monitor.
 
 [x] Documentar codigo.
-[x] Muestra mensaje de dispensadores vacios
+[x] Muestra mensaje de banda con dispensadores vacios
 [x] Validar que la banda este desocupada. 
-[x] crear 3 hilos para los dispensadores trabaje en conjunto a la funciòn while(pending_items) 
+[x] crear 3 hilos para que las bandas trabajen en conjunto a la funciòn while(pending_items) 
 [x] usar mutex para acceder al recurso compartido, en este caso a la siguiente orden. 
 
 [x] Manipular estados de la banda con order_band.
 [x] Enviar a travès de write los nuevos status_band y preparing_order.
 [x] Mostrar el estado de las bandas en order_band.
+[x] Rellenar de forma automàtica la banda de preparaciòn
+[x] Rellenar de forma manual la banda de preparaciòn
 
 [x] Mantener el server prendido con ambos procesos. 
 [x] Crear un server que lea el cliente order_gen y order_band en ejecuciòn y sin cerrar.

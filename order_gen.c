@@ -95,8 +95,6 @@ int main (){
     int len, rc ;
     struct sockaddr_in address;
     int result;
-    //int random_band; //Usado para almacenar valor random banda
-    int opt_news_orders=0;
     int opt_action=5;
 
     	// -- Inicio de la conexion -- 
@@ -139,6 +137,6 @@ int main (){
 
 
     printf("Vuelva pronto!\n");
-    close(result); //Cerramos la conexion con el socket
+    close(result); //Cerramos la conexión con el socket
     return 0;
 }

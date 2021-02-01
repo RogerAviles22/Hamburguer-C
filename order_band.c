@@ -147,13 +147,11 @@ int main(int argc, char  *argv[]){
 						printf("├Ingrese valores mayores o iguales a 0 o que no sobrepase el límite de dispensadores!┤\n");				
 
 	  			}while(cantidad<0 || cantidad> SIZE_D || (cantidadTotal+cantidad)> SIZE_D);
-				//printf("Añadido %i\n", cantidad);
-	  			preparation_band[pos_band][i] += cantidad;
+	  			preparation_band[pos_band][i] += cantidad; //Aumentamos la cantidad de ingredientes del dispensador
 	  			print_preparation_bands(preparation_band);
 	  		}
     	}
   		
-  		//print_preparation_bands(preparation_band);
   		write(sockfd, &preparation_band, sizeof(preparation_band)); //Enviamos la actualización de los dispensadores		
   		printf("Cambios realizados con éxito\n");
 
