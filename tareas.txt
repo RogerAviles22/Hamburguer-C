@@ -16,18 +16,23 @@ Realizados
 [x] Enviar las variables correspondientes a cliente y server. 
 [x] Mostrar orden procesada en gen_monitor.
 
-Proceso
-[] Documentar codigo.
-[] Muestra mensaje de dispensadores vacios, chequear codigo
-[] Validar que la banda este desocupada. 
-[] crear 3 hilos para los dispensadores trabaje en conjunto a la funciòn while(pending_items) 
-[] usar mutex para acceder al recurso compartido, en este caso a la matriz de ordenes.  
-[] Si vamos a crear 3 hilos, almacenarlos en un array para una mejor manipulacion al momento de suspenderlos?
-[] La orden obtenida, se le cambia su valor estado en next item.
+[x] Documentar codigo.
+[x] Muestra mensaje de dispensadores vacios
+[x] Validar que la banda este desocupada. 
+[x] crear 3 hilos para los dispensadores trabaje en conjunto a la funciòn while(pending_items) 
+[x] usar mutex para acceder al recurso compartido, en este caso a la siguiente orden. 
+
+Proceso 
+[] Manipular estados de la banda con order_band.
+[] Enviar a travès de write los nuevos status_band y preparing_order.
+[] Mostrar el estado de las bandas en order_band.
+[] Mantener el server prendido con ambos procesos. 
 
 Faltantes
-[] Manipular estados de la banda con otro proceso.
-[] Manejar procesos por id.
+[] Crear un server que lea el cliente order_gen y order_band en ejecuciòn y sin cerrar.
+[] Implementar cola FIFO.
+[] Cargar primero cola FIFO antes que las nuevas ordenes.
+
 
 
 

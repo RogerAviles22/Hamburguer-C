@@ -19,7 +19,7 @@
 int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
 int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
 
-char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "French-Fries"}; 
+char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "Baccon" ,"French-Fries"}; 
 
 void mostrarMensajeAudiencia(){
   printf("\t¡Bienvenidos a BURGUER-MAKING MACHINE V2!\n");
@@ -88,7 +88,7 @@ void fill_orders (int matrix_orders[SIZE_F][SIZE_C],int status[SIZE_F]){
         status[i]=0;
 }
 
-int main (int argc, char *argv[]){
+int main (){
   
 	char buffer[50]; 
 	int sockfd;
@@ -97,6 +97,7 @@ int main (int argc, char *argv[]){
 	int result;
 	//int random_band; //Usado para almacenar valor random banda
   int opt_news_orders=0;
+  int opt_action=5;
 
    		// -- Inicio de la conexion -- 
   //Create socket for client. 
@@ -136,6 +137,8 @@ do{
       fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
       print_orders (matrix_orders); //Mostramos los datos
   }
+
+  write(sockfd, &opt_action, sizeof(opt_action)); //0. Enviamos la action opt
 
   write(sockfd, &matrix_orders, sizeof(matrix_orders)); //1. Enviamos la matriz_orders
   write(sockfd, &status, sizeof(status)); //2. Enviamos la matriz_status
