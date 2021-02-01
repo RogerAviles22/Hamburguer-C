@@ -259,7 +259,7 @@ int main(){
 						max_socket_so_far = client_sockfd;
 					}
 				}else{
-					//realizamos las acciones dadas
+					//Leemos y Escribimos según el proceso
 					rc = read(client_sockfd, &opt_action,sizeof(opt_action)); //0. Cargamos la opt_action
 
 					if(opt_action!=5){ //ES != 5 porque este ID lo tiene order_ger, y no necesita esto.
@@ -303,6 +303,7 @@ int main(){
 
 				     	int pos0 =0, pos1 =1, pos2 =2;
 
+				     	//Controlamos qué banda se ejecuta segùn su estado.
 				     	if(status_band[pos0]!=2)
 				     		pthread_create(&tid_bands1, NULL, band_thread, &pos0);
 				     	if(status_band[pos1]!=2)
@@ -321,13 +322,10 @@ int main(){
 						print_preparation_bands(preparation_band);
 						printf("Hamburguesas preparadas por banda\n" );
 						for (int j = 0; j < SIZE_B; j++)
-							printf("La banda %i preparo %i hamburguesas.\n", (j+1), (prepared_burguer_counter[j]));		
+							printf("La banda %i preparo %i hamburguesas.\n", (j+1), (prepared_burguer_counter[j]));	
 				     	
-						/*if(strstr(buffer, "banda") != NULL){
-							printf("╠══ %s ,rc=%d ══╣\n",buffer,rc); 
-						}*/
 					}
-					FD_CLR(i, &current_sockets);						
+					FD_CLR(i, &current_sockets); //Limpia las conexiones hechas				
 				}
 			}
 		}

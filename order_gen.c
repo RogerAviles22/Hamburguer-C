@@ -89,70 +89,56 @@ void fill_orders (int matrix_orders[SIZE_F][SIZE_C],int status[SIZE_F]){
 }
 
 int main (){
-  
-	char buffer[50]; 
-	int sockfd;
-	int len, rc ;
-	struct sockaddr_in address;
-	int result;
-	//int random_band; //Usado para almacenar valor random banda
-  int opt_news_orders=0;
-  int opt_action=5;
 
-   		// -- Inicio de la conexion -- 
-  //Create socket for client. 
-  //Apertura de un socket
-	sockfd = socket(PF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) { 
-		perror("Socket create failed.\n") ; 
-		return -1 ; 
-	} 
-	
-	//Name the socket as agreed with server.
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = inet_addr("127.0.0.1");
-	address.sin_port = htons(7734);
-	len = sizeof(address);
-	//Solicitar conexión con el servidor
-	result = connect(sockfd, (struct sockaddr *)&address, len);
+    char buffer[50]; 
+    int sockfd;
+    int len, rc ;
+    struct sockaddr_in address;
+    int result;
+    //int random_band; //Usado para almacenar valor random banda
+    int opt_news_orders=0;
+    int opt_action=5;
 
-	if(result == -1){
-		perror("Error has occurred");
-		exit(-1);
-	}
-  // -- Fin de la conexion --
+    	// -- Inicio de la conexion -- 
+    //Create socket for client. 
+    //Apertura de un socket
+    sockfd = socket(PF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) { 
+      perror("Socket create failed.\n") ; 
+      return -1 ; 
+    } 
 
-  srand(time(NULL)); //Para obtener distintos tipos de valores random en cada ejecucion
+    //Name the socket as agreed with server.
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = inet_addr("127.0.0.1");
+    address.sin_port = htons(7734);
+    len = sizeof(address);
+    //Solicitar conexión con el servidor
+    result = connect(sockfd, (struct sockaddr *)&address, len);
 
-  mostrarMensajeAudiencia();
+    if(result == -1){
+      perror("Error has occurred");
+      exit(-1);
+    }
+    // -- Fin de la conexion --
 
-  print_list_ingredients(); 
-  // -- Inicio creacion de las 10 Ordenes --
-  memset(matrix_orders,0,sizeof(matrix_orders)); //Llenamos con ceros el buffer.
-  fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
-  print_orders (matrix_orders); //Mostramos los datos
+    srand(time(NULL)); //Para obtener distintos tipos de valores random en cada ejecucion
 
-//do{
-  /*while(1){
-    if(opt_news_orders==1){ //Si la opción es 1, crea nuevas ordenes.
-        fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
-        print_orders (matrix_orders); //Mostramos los datos
-    }*/
+    mostrarMensajeAudiencia();
+
+    print_list_ingredients(); 
+    // -- Inicio creacion de las 10 Ordenes --
+    memset(matrix_orders,0,sizeof(matrix_orders)); //Llenamos con ceros el buffer.
+    fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
+    print_orders (matrix_orders); //Mostramos los datos
 
     write(sockfd, &opt_action, sizeof(opt_action)); //0. Enviamos la action opt
 
     write(sockfd, &matrix_orders, sizeof(matrix_orders)); //1. Enviamos la matriz_orders
     write(sockfd, &status, sizeof(status)); //2. Enviamos la matriz_status
-    //memset(buffer,0,sizeof(buffer));
-    
-    //rc =  read(sockfd, &buffer,sizeof(buffer) ); //3. Recibe orden despachada
 
-    /*printf("¿Ingresar 10 nuevos pedidos?\nSí = 1\nNo = 0\nRespuesta : ");
-    scanf("%i",&opt_news_orders); //Leyendo el número solicitado*/
-    //}
-//}while(opt_news_orders==1);
 
-  printf("Vuelva pronto!\n");
-  close(result); //Cerramos la conexion con el socket
-  return 0;
+    printf("Vuelva pronto!\n");
+    close(result); //Cerramos la conexion con el socket
+    return 0;
 }
