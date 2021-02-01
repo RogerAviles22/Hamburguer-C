@@ -8,6 +8,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/select.h>
 
 #define SIZE_F    10      /* row size */ 
 #define SIZE_B    3  /* band size*/
@@ -97,7 +98,7 @@ int pending_items(int matrix_orders[SIZE_F][SIZE_C]){
 }
 
 /*Retorna -1 si ocurre un error al sumar los panes
-Retorna un i drepresenta la orden que aùn no haya sido despachada*/
+Retorna un i que representa la orden que aùn no haya sido despachada*/
 int next_item (int matrix_orders[SIZE_F][SIZE_C]){
     int i;
     int sum;
@@ -176,7 +177,7 @@ void *band_thread(void *arg){
 
 
 int main(){
-	//Declaring process variables.
+
 	int server_sockfd, client_sockfd;
 	struct sockaddr_in server_address;
 	struct sockaddr_in client_address;
@@ -184,6 +185,10 @@ int main(){
 	int rc ; 
 	unsigned client_len;
 	int order, vendidos = 10;
+	int buffer[50];
+
+	int numeroClientes = 0;			/* Número clientes conectados */
+	fd_set current_sockets, ready_sockets;	/* Descriptores de interes para select() */
 
 	pid_t childpid;
 
@@ -213,85 +218,118 @@ int main(){
 	}
 	printf("RC from bind = %d\n", rc ) ; 
 	
-	//Create a connection queue and wait for clients. Avisar al sistema de que comience a atender dicha conexión de red. 	
+	//Avisar al sistema de que comience a atender dicha conexión de red. 	
 	rc = listen(server_sockfd, 10); //Antes era 5
 	printf("RC from listen = %d\n", rc ); 
 	client_len = sizeof(client_address);
-
-	//Pedir y aceptar las conexiones de clientes al sistema operativo.
-	client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_len);
-	if(client_sockfd < 0){
-		exit(1);
-	}
-	printf("after accept()... client_sockfd = %d\n", client_sockfd) ; 
 
   	fill_preparation_bands(preparation_band, status_band);
  	print_preparation_bands(preparation_band);
   	srand(time(NULL)); //Para obtener distintos tipos de valores random en cada ejecucion
 
+  	int max_socket_so_far = 0;
+	//Initialize my current set
+	FD_ZERO(&current_sockets);
+	FD_SET(server_sockfd, &current_sockets);
+	max_socket_so_far = server_sockfd; 
+
 	//Escribir y recibir datos del cliente
 	while(1){
+		//because select is destructive
+		ready_sockets = current_sockets;
 
-		rc = read(client_sockfd, &opt_action,sizeof(opt_action)); //0. Cargamos la opt_action
-
-		if(opt_action!=5){ //ES != 5 porque este ID lo tiene order_ger, y no necesita esto.
-			write(client_sockfd, &preparation_band, sizeof(preparation_band)); //0.1 Enviamos la preparation_band
-  			write(client_sockfd, &status_band, sizeof(status_band)); //0.2 Enviamos el status de la banda
+		if(select(FD_SETSIZE, &ready_sockets, NULL, NULL, NULL)<0){
+			perror("Error en select");
+			exit(-1);
 		}
-		if (opt_action==1){
-			printf("Enviando estado de la banda...\n");
-		}
-		else if (opt_action==2){ //
-  			read(client_sockfd, &status_band, sizeof(status_band)); //0.3 Leemos el status nuevo de la banda
 
-		}else if (opt_action==3){
-			read(client_sockfd, &preparation_band, sizeof(preparation_band)); //0.5 Leemos la actualización del dispensador
+		for (int i = 0; i <= max_socket_so_far; i++){
+			if(FD_ISSET(i, &ready_sockets)){
+				if(i==server_sockfd){
+					//esta es la nueva conexión
+					//Pedir y aceptar las conexiones de clientes al sistema operativo.
+					client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_len);
+					if(client_sockfd < 0){
+						perror("Error en conexión\n");
+						exit(-1);
+					}
+					printf("after accept()... client_sockfd = %d\n", client_sockfd) ; 
+					FD_SET(client_sockfd, &current_sockets);
+					if(client_sockfd> max_socket_so_far){
+						max_socket_so_far = client_sockfd;
+					}
+				}else{
+					//realizamos las acciones dadas
+					rc = read(client_sockfd, &opt_action,sizeof(opt_action)); //0. Cargamos la opt_action
 
-		}else if (opt_action==4){
-  			read(client_sockfd, &status_band, sizeof(status_band)); //0.4 Leemos el status nuevo de la banda
+					if(opt_action!=5){ //ES != 5 porque este ID lo tiene order_ger, y no necesita esto.
+						write(client_sockfd, &preparation_band, sizeof(preparation_band)); //0.1 Enviamos la preparation_band
+			  			write(client_sockfd, &status_band, sizeof(status_band)); //0.2 Enviamos el status de la banda
+					}
+					if (opt_action==1){
+						printf("Enviando estado de la banda...\n");
+					}
+					else if (opt_action==2){ //
+						printf("Actualizando estado de la banda...\n");
+			  			read(client_sockfd, &status_band, sizeof(status_band)); //0.3 Leemos el status nuevo de la banda
+						printf("Actualizado estado de la banda\n");
 
-		}else{
-			memset(matrix_orders,0,sizeof(matrix_orders));	
-			rc = read(client_sockfd, &matrix_orders,sizeof(matrix_orders)); //1. Cargamos la matriz orden
-			if(rc>0){
-				printf("╠══ Turno %i ══╣\n", vendidos);
-				read(client_sockfd, &status,sizeof(status)); //2. Cargamos la matriz status		
-				vendidos+=10;		
+					}else if (opt_action==3){
+						printf("Actualizando preparation band...\n");
+						read(client_sockfd, &preparation_band, sizeof(preparation_band)); //0.5 Leemos la actualización del dispensador
+						printf("Actualizada preparation band\n");
+
+					}else if (opt_action==4){
+						printf("Actualizando estado de la banda...\n");
+			  			read(client_sockfd, &status_band, sizeof(status_band)); //0.4 Leemos el status nuevo de la banda
+						printf("Actualizado estado de la banda\n");
+
+					}else{
+						memset(matrix_orders,0,sizeof(matrix_orders));	
+						rc = read(client_sockfd, &matrix_orders,sizeof(matrix_orders)); //1. Cargamos la matriz orden
+						if(rc>0){
+							printf("╠══ Turno %i ══╣\n", vendidos);
+							read(client_sockfd, &status,sizeof(status)); //2. Cargamos la matriz status		
+							vendidos+=10;		
+						}
+
+				     	if (rc <= 0){
+				     		printf("Apagando máquina\n");
+				     		sleep(1);
+				     		printf("¡Adiós!\n");
+				     		sleep(1);
+				     		break;
+				     	} 
+
+				     	int pos0 =0, pos1 =1, pos2 =2;
+
+				     	if(status_band[pos0]!=2)
+				     		pthread_create(&tid_bands1, NULL, band_thread, &pos0);
+				     	if(status_band[pos1]!=2)
+				     		pthread_create(&tid_bands2, NULL, band_thread, &pos1);
+				     	if(status_band[pos2]!=2)
+				     		pthread_create(&tid_bands3, NULL, band_thread, &pos2);
+
+				     	if(status_band[pos0]!=2)
+							pthread_join(tid_bands1, NULL);
+						if(status_band[pos1]!=2)
+							pthread_join(tid_bands2, NULL);
+						if(status_band[pos2]!=2)
+							pthread_join(tid_bands3, NULL);
+
+				  		printf("[\t--Estados de la bandas---]\n");
+						print_preparation_bands(preparation_band);
+						printf("Hamburguesas preparadas por banda\n" );
+						for (int j = 0; j < SIZE_B; j++)
+							printf("La banda %i preparo %i hamburguesas.\n", (j+1), (prepared_burguer_counter[j]));		
+				     	
+						/*if(strstr(buffer, "banda") != NULL){
+							printf("╠══ %s ,rc=%d ══╣\n",buffer,rc); 
+						}*/
+					}
+					FD_CLR(i, &current_sockets);						
+				}
 			}
-
-	     	if (rc <= 0){
-	     		printf("Apagando máquina\n");
-	     		sleep(1);
-	     		printf("¡Adiós!\n");
-	     		sleep(1);
-	     		break;
-	     	} 
-
-	     	int pos0 =0, pos1 =1, pos2 =2;
-
-	     	if(status_band[pos0]!=2)
-	     		pthread_create(&tid_bands1, NULL, band_thread, &pos0);
-	     	if(status_band[pos1]!=2)
-	     		pthread_create(&tid_bands2, NULL, band_thread, &pos1);
-	     	if(status_band[pos2]!=2)
-	     		pthread_create(&tid_bands3, NULL, band_thread, &pos2);
-
-	     	if(status_band[pos0]!=2)
-				pthread_join(tid_bands1, NULL);
-			if(status_band[pos1]!=2)
-				pthread_join(tid_bands2, NULL);
-			if(status_band[pos2]!=2)
-				pthread_join(tid_bands3, NULL);
-
-	  		printf("[\t--Estados de la bandas---]\n");
-			print_preparation_bands(preparation_band);
-			printf("Hamburguesas preparadas por banda\n" );
-			for (int i = 0; i < SIZE_B; i++)
-				printf("La banda %i preparo %i hamburguesas.\n", (i+1), (prepared_burguer_counter[i]));		
-	     	
-			/*if(strstr(buffer, "banda") != NULL){
-				printf("╠══ %s ,rc=%d ══╣\n",buffer,rc); 
-			}*/
 		}
 			
 	}

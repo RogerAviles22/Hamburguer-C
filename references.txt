@@ -41,7 +41,10 @@ atoi:
 https://www.tutorialspoint.com/c_standard_library/c_function_atoi.htm
 
 select:
+https://www.youtube.com/watch?v=Y6pFtgRdUts&t=91s
+https://man7.org/linux/man-pages/man2/select.2.html
 http://manpages.ubuntu.com/manpages/bionic/es/man2/select_tut.2.html
 https://stackoverflow.com/questions/49637893/how-to-read-connections-at-the-same-time-using-select-sockets-c
 https://stackoverflow.com/questions/39391541/socket-client-using-select
+https://linux.die.net/man/2/select
 

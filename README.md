@@ -47,7 +47,7 @@ En caso de "Error in binding.", ejecutar la siguiente lìnea:
 ```
 ps -ef | grep order
 ```
-Buscamos el procesos "order_monitor" y lo eliminamos con:
+Buscamos el procesos "order_..." y lo eliminamos con:
 ```
 kill -9 <number_process>
 ```

@@ -24,7 +24,7 @@ bool mflag = false;
 int preparation_band[SIZE_B][SIZE_C]; //Matriz con las cantidad de cintas y sus respectivos ingredientes
 int status_band [SIZE_B]; // 0 en reposo (sin orden), 1 en ejecución, 2 pausado
 
-char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "Baccon" ,"French-Fries"}; 
+char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Cheese", "Baccon" ,"French-Fries"}; 
 
 void message_help();
 void print_preparation_bands (int preparation_band[SIZE_B][SIZE_C]);
@@ -36,6 +36,7 @@ int main(int argc, char  *argv[]){
 	char *cvalue = NULL;
 	char opt;
 	int pos_band, opt_band;
+	int decision =0;
 
 	while( (opt= getopt(argc, argv, "hsp:r:m:")) != -1 ){
 		switch(opt){
@@ -123,21 +124,36 @@ int main(int argc, char  *argv[]){
   		printf("\t\t---MANTENIMIENTO---\n");
   		print_preparation_bands(preparation_band);
   		printf("Bandar #%i a rellenar:\n",pos_band);
-  		for (int i = 0; i < SIZE_C; i++){
-  			int cantidad =0;
-  			int cantidadTotal = preparation_band[pos_band][i];
-  			int cantidadFaltante = SIZE_D - cantidadTotal;
-  			do{
-  				printf("Rellenar %s, valor actual = %i, valor faltante = %i, su valor =", list_ingredients[i], cantidadTotal,  cantidadFaltante);
-				scanf("%i",&cantidad); //Leyendo el número a rellenar
-				printf("\n");
-				if(cantidad<0 || cantidad> SIZE_D || (cantidadTotal+cantidad)> SIZE_D)
-					printf("├Ingrese valores mayores o iguales a 0 o que no sobrepase el límite de dispensadores!┤\n");
 
-  			}while(cantidad<0 || cantidad> SIZE_D || (cantidadTotal+cantidad)> SIZE_D);
+  		do{
+	  		printf("¿Rellenar forma automática o manual?\nAutomática = 1\nManual = 0\nRespuesta : ");
+	    	scanf("%i",&decision); //Leyendo el número solicitado  			
+  		}while(decision>1 || decision<0);
+  		
+    	if(decision==1){
+    		for (int i = 0; i < SIZE_C; i++)
+	  			preparation_band[pos_band][i] = SIZE_D;   
+	  		print_preparation_bands(preparation_band); 		
+    	}else{
+    		for (int i = 0; i < SIZE_C; i++){
+	  			int cantidad =0;
+	  			int cantidadTotal = preparation_band[pos_band][i];
+	  			int cantidadFaltante = SIZE_D - cantidadTotal;
+	  			do{
+	  				printf("Rellenar %s, valor actual = %i, valor faltante = %i, su valor =", list_ingredients[i], cantidadTotal,  cantidadFaltante);
+					scanf("%i",&cantidad); //Leyendo el número a rellenar
+					printf("\n");
+					if(cantidad<0 || cantidad> SIZE_D || (cantidadTotal+cantidad)> SIZE_D)
+						printf("├Ingrese valores mayores o iguales a 0 o que no sobrepase el límite de dispensadores!┤\n");				
 
-  			preparation_band[SIZE_B][SIZE_C] += cantidad;
-  		}
+	  			}while(cantidad<0 || cantidad> SIZE_D || (cantidadTotal+cantidad)> SIZE_D);
+				//printf("Añadido %i\n", cantidad);
+	  			preparation_band[pos_band][i] += cantidad;
+	  			print_preparation_bands(preparation_band);
+	  		}
+    	}
+  		
+  		//print_preparation_bands(preparation_band);
   		write(sockfd, &preparation_band, sizeof(preparation_band)); //Enviamos la actualización de los dispensadores		
   		printf("Cambios realizados con éxito\n");
 

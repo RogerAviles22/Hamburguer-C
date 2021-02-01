@@ -19,7 +19,7 @@
 int matrix_orders[SIZE_F][SIZE_C]; //Matriz de ordenes, cada columna va corresponder a un ingrediente
 int status[SIZE_F]; //0 no enviado, 1 en proceso, 2 finalizado
 
-char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Mayo", "Baccon" ,"French-Fries"}; 
+char list_ingredients [SIZE_C][20] = {"Bread", "Meat", "Tomato", "Onion", "Ham", "Egg", "Lettuce", "Cheese", "Baccon" ,"French-Fries"}; 
 
 void mostrarMensajeAudiencia(){
   printf("\t¡Bienvenidos a BURGUER-MAKING MACHINE V2!\n");
@@ -132,23 +132,25 @@ int main (){
   fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
   print_orders (matrix_orders); //Mostramos los datos
 
-do{
-  if(opt_news_orders==1){ //Si la opción es 1, crea nuevas ordenes.
-      fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
-      print_orders (matrix_orders); //Mostramos los datos
-  }
+//do{
+  /*while(1){
+    if(opt_news_orders==1){ //Si la opción es 1, crea nuevas ordenes.
+        fill_orders(matrix_orders,status); //Llenamos las nuevas ordenes
+        print_orders (matrix_orders); //Mostramos los datos
+    }*/
 
-  write(sockfd, &opt_action, sizeof(opt_action)); //0. Enviamos la action opt
+    write(sockfd, &opt_action, sizeof(opt_action)); //0. Enviamos la action opt
 
-  write(sockfd, &matrix_orders, sizeof(matrix_orders)); //1. Enviamos la matriz_orders
-  write(sockfd, &status, sizeof(status)); //2. Enviamos la matriz_status
-  //memset(buffer,0,sizeof(buffer));
-  
-  //rc =  read(sockfd, &buffer,sizeof(buffer) ); //3. Recibe orden despachada
+    write(sockfd, &matrix_orders, sizeof(matrix_orders)); //1. Enviamos la matriz_orders
+    write(sockfd, &status, sizeof(status)); //2. Enviamos la matriz_status
+    //memset(buffer,0,sizeof(buffer));
+    
+    //rc =  read(sockfd, &buffer,sizeof(buffer) ); //3. Recibe orden despachada
 
-  printf("¿Ingresar 10 nuevos pedidos?\nSí = 1\nNo = 0\nRespuesta : ");
-  scanf("%i",&opt_news_orders); //Leyendo el número solicitado
-}while(opt_news_orders==1);
+    /*printf("¿Ingresar 10 nuevos pedidos?\nSí = 1\nNo = 0\nRespuesta : ");
+    scanf("%i",&opt_news_orders); //Leyendo el número solicitado*/
+    //}
+//}while(opt_news_orders==1);
 
   printf("Vuelva pronto!\n");
   close(result); //Cerramos la conexion con el socket
