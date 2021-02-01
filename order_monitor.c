@@ -178,12 +178,14 @@ void *band_thread(void *arg){
 int main(){
 	//Declaring process variables.
 	int server_sockfd, client_sockfd;
+	struct sockaddr_in server_address;
+	struct sockaddr_in client_address;
 	int server_len ; 
 	int rc ; 
 	unsigned client_len;
-	struct sockaddr_in server_address;
-	struct sockaddr_in client_address;
 	int order, vendidos = 10;
+
+	pid_t childpid;
 
 	int opt_action;
 
@@ -194,6 +196,10 @@ int main(){
 
 	//Remove any old socket and create an unnamed socket for the server.
 	server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if(server_sockfd < 0){
+		printf("Error in connection.\n");
+		exit(1);
+	}
 	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = htons(INADDR_ANY);
 	server_address.sin_port = htons(7734) ; 
@@ -201,17 +207,23 @@ int main(){
 
 	//Avisar al sistema operativo de que hemos abierto un socket y queremos que asocie nuestro programa a dicho socket.
 	rc = bind(server_sockfd, (struct sockaddr *) &server_address, server_len);
+	if(rc < 0){
+		printf("Error in binding.\n");
+		exit(-1);
+	}
 	printf("RC from bind = %d\n", rc ) ; 
 	
 	//Create a connection queue and wait for clients. Avisar al sistema de que comience a atender dicha conexión de red. 	
-	rc = listen(server_sockfd, 5);
+	rc = listen(server_sockfd, 10); //Antes era 5
 	printf("RC from listen = %d\n", rc ); 
 	client_len = sizeof(client_address);
 
 	//Pedir y aceptar las conexiones de clientes al sistema operativo.
 	client_sockfd = accept(server_sockfd, (struct sockaddr *) &client_address, &client_len);
+	if(client_sockfd < 0){
+		exit(1);
+	}
 	printf("after accept()... client_sockfd = %d\n", client_sockfd) ; 
-
 
   	fill_preparation_bands(preparation_band, status_band);
  	print_preparation_bands(preparation_band);
@@ -281,7 +293,7 @@ int main(){
 				printf("╠══ %s ,rc=%d ══╣\n",buffer,rc); 
 			}*/
 		}
-	
+			
 	}
 
 	printf("server exiting\n");

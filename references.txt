@@ -40,3 +40,8 @@ https://www.programiz.com/c-programming/library-function/ctype.h/isdigit#:~:text
 atoi:
 https://www.tutorialspoint.com/c_standard_library/c_function_atoi.htm
 
+select:
+http://manpages.ubuntu.com/manpages/bionic/es/man2/select_tut.2.html
+https://stackoverflow.com/questions/49637893/how-to-read-connections-at-the-same-time-using-select-sockets-c
+https://stackoverflow.com/questions/39391541/socket-client-using-select
+

@@ -143,6 +143,7 @@ int main(int argc, char  *argv[]){
 
   	}
 
+	close(result); //Cerramos la conexion con el socket
 	return 0;
 }
 
